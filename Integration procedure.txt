@@ -1,0 +1,288 @@
+Language can be used to integrate smart contracts with websites => Python, Javascript
+
+Web3 libraries can be used to integrate smart contracts with websites => Web3.py, Web3.JS, Ethers.JS, Web3Wallet, Wagmi, etc.
+
+Front-end Framework can be used to integrate smart contracts with websites => NextJS, ReactJS, Basic HTML, VueJS, etc.
+
+Wallets can be used to integrate smart contracts with websites => Metamask, WalletConnect, etc.
+
+
+My Suggestion =>
+1. Javascript has more flexibility and a wide range of libraries.
+2. Wagmi is best with the WalletConnect modal.
+3. NextJS is better,
+4. The user will be able to connect any wallet the user wants if we integrate WalletConnect.
+
+Example of sending a transaction in the blockchain/smart contract using EthersJS and Basic HTML:
+
+async function addToCommunity() {
+console.log(`adding to the community...`)
+if (typeof window.ethereum !== "undefined") {
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+await provider.send("eth_requestAccounts", [])
+const signer = provider.getSigner()
+const contract = new ethers.Contract(contractAddress, abi, signer)
+try {
+const transactionResponse = await contract.addToCommunity("0x6663184b3521bf1896ba6e1e776ab94c317204b6")
+await listenForTransactionMine(transactionResponse, provider)
+// await transactionResponse.wait(1)
+} catch (error) {
+console.log(error)
+}
+} else {
+withdrawButton.innerHTML = "Please install MetaMask"
+}
+}
+
+Example of reading from the blockchain/smart contract using EthersJS and Basic HTML:
+
+async function getCurrentMemberId() {
+if (typeof window.ethereum !== "undefined") {
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+const signer = provider.getSigner()
+const contract = new ethers.Contract(contractAddress, abi, signer)
+try {
+const id= await contract.getCurrentMemberId()
+
+} catch (error) {
+console.log(error)
+}
+} else {
+balanceButton.innerHTML = "Please install MetaMask"
+}
+}
+
+Example of sending a transaction in the blockchain/smart contract using Wagmi and NextJS:
+
+const addToCommunity= async (
+) => {
+try {
+const account = getAccount();
+const args = [URL];
+const config = await prepareWriteContract({
+address: contractAddress,
+abi: contractABI,
+functionName: "addToCommunity",
+args: "0x6663184b3521bf1896ba6e1e776ab94c317204b6",
+chainId: expectedChainId,
+account: account,
+});
+const { hash } = await writeContract(config);
+const data = await waitForTransaction({
+confirmations: 1,
+chainId: expectedChainId,
+hash: hash,
+});
+console.log(data);
+} catch (error) {
+console.log(error);
+}
+};
+
+Example of reading from the blockchain/smart contract using Wagmi and NextJS:
+const getCurrentMemberId= async (user) => {
+try {
+const args = [user];
+const data = await readContract({
+address: contractAddress,
+abi: contractABI,
+functionName: "getCurrentMemberId",
+args:[],
+chainId: expectedChainId,
+});
+return data;
+} catch (error) {
+console.log(error);
+}
+};
+
+Steps to initiate the TandaPay Logic:
+
+1. The secretary needs to add at least 12 members to the community.
+2. The secretary needs to create at least 3 Subgroups.
+3. The secretary needs to assign at least 12 members to the 3 SubGroups including at least 4 members on each SubGroup.
+4. The next step for the secretary is to call the initiatDefaultStateAndSetCoverage function to set up the coverage and move the community state to Default from the Initialization. After that, the members will be able to join the community by calling the joinToCommunity function.
+5. Now, the secretary can initiate the first period by calling the AdvanceToTheNextPeriod function. And the TandaPay project logic will start working even though, no one can submit a claim in the first period as they haven't paid the previous period.
+
+
+All the functions only the secretary can call:
+
+1. addToCommunity =>
+Use case -- This function will be used to add a new member to the TandaPay community.
+Arguments --- The secretary needs to provide the member's wallet address while adding a member to the community.
+
+2. createSubGroup=>
+Use case -- This function will be used to create a SubGroup for the TandaPay community.
+Arguments --- none required.
+
+3 . assignToSubGroup =>
+Use case -- This function will be used to assign a member to a SubGroup.
+Arguments --- The secretary needs to provide the member's wallet, the SubGroup ID, if the member is being re-orged or not using a bool variable.
+
+4. initiatDefaultStateAndSetCoverage =>
+Use case -- This function will be used to set the default coverage and initiate the default state of the community.
+Arguments --- The secretary will have to pass the default coverage amount while calling this function.
+
+5. whitelistClaim =>
+Use case -- This function will be used to whitelist a claim submitted by the claimants.
+Arguments --- The secretary will have to pass the claim ID while calling this function
+
+6. updateCoverageAmount =>
+Use case -- This function will be used to update the current total coverage amount.
+Arguments --- The secretary will have to pass the new coverage amount while calling this function
+
+7. defineSecretarySuccessor =>
+Use case -- This function will be used to define the secretary successors list.
+Arguments --- The secretary will have to pass an array of addresses while calling this function
+
+8. handoverSecretary =>
+Use case -- This function will be used to hand over the secretary to a new member who is in line with the successors.
+Arguments --- The secretary will have to pass an address while calling this function if the secretary has a preferred successor otherwise zero address.
+
+9. injectFunds =>
+Use case -- This function will be used to inject funds by the secretary while necessary.
+Arguments --- none required
+
+10. divideShortFall =>
+Use case -- This function will be used to divide the short amount among all the members.
+Arguments --- none required
+
+11. addAdditionalDay =>
+Use case -- This function will be used to add a day before the end of the period.
+Arguments --- none required
+
+12. manualCollapsBySecretary =>
+Use case -- This function will be used to manually collapse the community.
+Arguments --- none required
+
+13. cancelManualCollapsBySecretary =>
+Use case -- This function will be used to cancel the manual collapse which was enabled by the secretary.
+Arguments --- none required
+
+14. AdvanceToTheNextPeriod =>
+Use case -- This function will be used to advance the current period and initiate the next period.
+Arguments --- none required
+
+
+
+All the functions members will interact with throughout the process:
+
+1.  joinToCommunity  =>
+Use case -- The user will join the community and transfer the 11/12th of the individual savings amount's fund.
+Arguments --- none required
+
+2. approveSubGroupAssignment  =>
+Use case -- This function will be used to approve the SubGroup assignment of the member 
+Arguments --- members will have to pass a boolean value of if they want to join or not.
+
+3. approveNewSubgroupMember  =>
+Use case -- This function will be used to approve a new SubGroup member by the existing SubGroup member if the new member is being re-orged.
+Arguments --- The member will have to pass the SubGroup ID, the new member's ID, and a boolean value of whether the new member is accepted or not.
+
+4. exitSubGroup  =>
+Use case -- Member will be able to exit from a SubGroup using this function.
+Arguments --- none required
+
+5. defects  =>
+Use case -- Member will be able to defects using this function.
+Arguments --- none required
+
+6. payPremium  =>
+Use case -- The Valid members will be able to pay the upcoming period's premium using this function
+Arguments --- none required
+
+7. secretaryAcceptance  =>
+Use case -- The valid members who are in line of the secretary successors list and are being voted for the secretary can accept the secretary using this function.
+Arguments --- none required
+
+8. emergencyHandOverSecretary  =>
+Use case --  The valid members who are in the line of the secretary successors list can call this function and set up another valid member who is also in the line of the secretary successors list as a secretary in emergencies.
+Arguments --- The member will have to pass the preferred successors wallet address while calling this function.
+
+9. withdrawRefund=>
+Use case -- The member will be able to withdraw their available fund by calling this function.
+Arguments --- none required
+
+10. submitClaim =>
+Use case -- The members who are eligible for the coverage will be able to submit for claim using this function.
+Arguments --- none required
+
+11. withdrawClaimFund  =>
+Use case -- The whitelisted claimant will be able to withdraw the claim amount by calling this function
+Arguments --- none required
+
+
+All the public view function/ getter function to read from the smart contract:
+
+1. getPaymentToken =>
+Use case -- This function will return the current payment token (LUSD) address.
+Arguments --- none required
+
+2. getCurrentMemberId =>
+Use case -- This function will return the current member ID. 
+Arguments --- none required
+
+3. getCurrentSubGroupId =>
+Use case -- This function will return the current SubGroup ID. 
+Arguments --- none required
+
+4. getCurrentClaimId =>
+Use case -- This function will return the current Claim ID. 
+Arguments --- none required 
+
+5. getPeriodId =>
+Use case -- This function will return the current Period ID.
+Arguments --- none required 
+
+6. getTotalCoverage =>
+Use case -- This function will return the current total coverage amount.
+Arguments --- none required 
+
+7. getBasePremium =>
+Use case -- This function will return the current base premium amount.
+Arguments --- none required 
+
+8. getManuallyCollapsedPeriod =>
+Use case -- if manually collapsed then, this function will return the manually collapsed period ID.
+Arguments --- none required 
+
+9. getIsManuallyCollapsed =>
+Use case -- This function will return if the manual collapse happened or not.
+Arguments --- none required 
+
+10. getCommunityState =>
+Use case -- This function will return the current community state in number, 0 means it's in initialization state, 1 means default, 2 means fractured, and 3 means collapsed.
+Arguments --- none required 
+
+11. getSubGroupIdToSubGroupInfo =>
+Use case -- This function will return the SubGroup-related information.
+Arguments --- The Caller will have to provide the SubGroup ID.
+
+12. getPeriodIdToClaimIdToClaimInfo =>
+Use case -- This function will return the claim-related information.
+Arguments --- The caller will have to provide the period ID and the Claim ID.
+
+13. getPeriodIdToClaimIds =>
+Use case -- This function will return the claim IDs of the period.
+Arguments ---The caller will have to provide the period ID.
+
+14. getPeriodIdToDefectorsId =>
+Use case -- This function will return the defectors IDs of the period.
+Arguments --- The caller will have to provide the period ID.
+
+15. getPeriodIdToManualCollapse =>
+Use case -- This function will return the manual collapse information.
+Arguments --- The caller will have to provide the period ID.
+
+16. getMemberToMemberId =>
+Use case -- This function will return the member ID of the member.
+Arguments --- The caller will have to provide the member's wallet address.
+
+17. getPeriodIdWhiteListedClaims =>
+Use case -- This function will return the white-listed claim IDs of the period
+Arguments --- The caller will have to provide the period ID.
+
+18. getMemberToMemberInfo =>
+Use case -- This function will return the member's information
+Arguments --- The caller will have to provide the member's wallet address and an expected period ID. 
+
